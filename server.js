@@ -11,11 +11,9 @@ app.use(express.static('public'));
 
 app.get('/', async (req, res) => {
   try {
-    const retroGamingConsoles = await client.query(
-      'SELECT * FROM retroconsoles;'
-    ).rows; //This should return an array of "row objects", where every object has a property corresponding to a column in that row (i.e {name,abbrev,releaseYear,numberOfPlayers})
-    console.log(retroGamingConsoles); //I would appreciate some help figuring out why this returns undefined.
-    res.send(homePage(retroGamingConsoles)); //pass the array of game console objects, retroGamingConsoles, to the homePage function which returns html that uses the array.
+    const data = await client.query('SELECT * FROM retroconsoles');
+    const retroGamingConsoles = data.rows;
+    res.send(homePage(retroGamingConsoles));
   } catch (err) {
     console.log(err);
   }
@@ -23,9 +21,10 @@ app.get('/', async (req, res) => {
 
 app.get('/:abbrev', async (req, res) => {
   try {
-    const foundConsole = await client.query(
-      `SELECT * FROM retroconsoles WHERE abbrev = '${req.params.abbrev}';`
-    ).rows[0];
+    const data = await client.query(
+      `SELECT * FROM retroconsoles WHERE abbrev = '${req.params.abbrev}'`
+    );
+    const foundConsole = data.rows[0];
     res.send(details(foundConsole));
   } catch {
     res.send(pageNotFound());
